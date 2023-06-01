@@ -1,72 +1,93 @@
-![image](https://user-images.githubusercontent.com/109401839/212763285-615193c5-a326-4fe5-8387-fa77727c3666.png)
+<p align="center">
+<img src="https://i.imgur.com/Ua7udoS.png" alt="Traffic Examination"/>
+</p>
 
-<h1>Network File Shares and Permissions</h1>
-Welcome back! In this tutorial, We will create folders in DC-1 from the previous Tutorial. <br />
+<h1>Network Security Groups (NSGs) and Inspecting Traffic Between Azure Virtual Machines</h1>
+In this tutorial, we observe various network traffic to and from Azure Virtual Machines with Wireshark as well as experiment with Network Security Groups. <br />
+
 
 <h2>Environments and Technologies Used</h2>
 
-- Microsoft Azure (Virtual Machines/Domain Controller/Client Machine)
+- Microsoft Azure (Virtual Machines/Compute)
 - Remote Desktop
-- Shared Network Files
+- Various Command-Line Tools
+- Various Network Protocols (SSH, RDH, DNS, HTTP/S, ICMP)
+- Wireshark (Protocol Analyzer)
 
 <h2>Operating Systems Used </h2>
 
 - Windows 10 (21H2)
+- Ubuntu Server 20.04
+
+<h2>Prerequisites </h2>
+
+- Create Windows 10 (21H2) amd Ubuntu Server 20.04 vitrual machine on Microsoft Azure
+
+<h2>High-Level Steps</h2>
+
+- Observe ICMP Traffic
+- Observe SSH Traffic
+- Observe DHCP Traffic
+- Observe DNS Traffic
+- Observe RDP Traffic
 
 <h2>Actions and Observations</h2>
 
-Create some sample file shares with various permissions
+<p>
+<img src="https://i.imgur.com/jE4avGc.jpg" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+</p>
+<p>
+<h3>Observe ICMP Traffic</h3>
 
-1. Connect/log into DC-1 as your domain admin account (mydomain.com\jane_admin)
-2. Connect/log into Client-1 as a normal user (mydomain\<someuser>)
-3. On DC-1, on the C:\ drive, create 4 folders: “read-access”, “write-access”, “no-access”, “accounting”
+- Use Remote Desktop to connect to your Windows 10 Virtual Machine
+- Within your Windows 10 Virtual Machine, Install Wireshark
+- Open Wireshark and filter for ICMP traffic only
+- Retrieve the private IP address of the Ubuntu VM and attempt to ping it from within the Windows 10 VM
+   - Observe ping requests and replies within WireShark
+- From The Windows 10 VM, open command line or PowerShell and attempt to ping a public website (such as www.google.com) and observe the traffic in WireShark
+- Initiate a perpetual/non-stop ping from your Windows 10 VM to your Ubuntu VM
+   - Open the Network Security Group your Ubuntu VM is using and disable incoming (inbound) ICMP traffic
+   - Back in the Windows 10 VM, observe the ICMP traffic in WireShark and the command line Ping activity
+   - Re-enable ICMP traffic for the Network Security Group your Ubuntu VM is using
+   - Back in the Windows 10 VM, observe the ICMP traffic in WireShark and the command line Ping activity (should start working)
+   - Stop the ping activity
 
-![vivaldi_9PMyBqb1rk](https://user-images.githubusercontent.com/109401839/213238510-ac5e4b21-e1aa-4c55-a6bb-5896316fa34c.png)
+</p>
+<br />
 
+<p>
+<img src="https://i.imgur.com/J0YnD3J.jpg" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+</p>
+<p>
+<h3>Observe SSH Traffic</h3>
 
-4. Set the following permissions (share the folder) for the “Domain Users” group:
+- Back in Wireshark, filter for SSH traffic only
+- From your Windows 10 VM, “SSH into” your Ubuntu Virtual Machine (via its private IP address)
+   - Type commands (username, pwd, etc) into the linux SSH connection and observe SSH traffic spam in WireShark
+   - Exit the SSH connection by typing ‘exit’ and pressing [Enter]
 
-![vivaldi_udC3XRiOew](https://user-images.githubusercontent.com/109401839/213168775-c3202790-fd5b-412a-9403-c2a34f312c38.png)
+</p>
+<br />
 
-5. Folder: “read-access”, Group: “Domain Users”, Permission: “Read”
-6. Folder: “write-access”, Group: “Domain Users”, Permissions: “Read/Write”
-7. Folder: “no-access”, Group: “Domain Admins”, “Permissions: “Read/Write"
+<p>
+<img src="https://i.imgur.com/nCCPjVw.jpg" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+</p>
+<p>
+<h3>Observe DHCP Traffic</h3>
 
-![vivaldi_HFyJKXmKru](https://user-images.githubusercontent.com/109401839/213238914-a7cf2107-1316-49ff-a143-aee24da4e0cc.png)
+- Back in Wireshark, filter for DHCP traffic only
+- From your Windows 10 VM, attempt to issue your VM a new IP address from the command line (ipconfig /renew)
+   - Observe the DHCP traffic appearing in WireShark
 
-8. **(Skip accounting for now)**
+</p>
+<br />
 
-![2023-01-18 10 35 24 camo githubusercontent com bb1553347d44](https://user-images.githubusercontent.com/109401839/213239334-f81e1da5-d6ea-4dd7-a5b6-cc2dfd1d8825.jpg)
+<p>
+<img src="https://i.imgur.com/bB8jYer.jpg" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+</p>
+<p>
+<h3>Observe DNS Traffic</h3>
 
-
-**Attempt to access file shares as a normal user**
-
-1. **On Client-1, navigate to the shared folder (start, run, \\dc-1)**
-
-![vivaldi_2EJQr6eI7x](https://user-images.githubusercontent.com/109401839/213240066-cc5d8dbe-03fa-4c49-9b61-a26f385f6d18.png)
-
-2. **Try to access the folders you just created. Which folders can you access? Which folders can you create stuff in?**
-
-![vivaldi_mKtfJuMugZ](https://user-images.githubusercontent.com/109401839/213240171-a71b0990-f0e4-47e4-b29d-a1cf75d6b107.png)
-
-
-**Create an “ACCOUNTANTS” Security Group, assign permissions, an test access**
-
-1. **Go back to DC-1, in Active Directory, create a security group called “ACCOUNTANTS”**
-
-![vivaldi_21iy1mXf9Y](https://user-images.githubusercontent.com/109401839/213240836-dc93efd1-db6d-4a5f-b073-8107f9059209.png)
-
-![vivaldi_l2gDyFcQNi](https://user-images.githubusercontent.com/109401839/213241010-c6724461-224c-4ea2-91af-5e36ed9b63c4.png)
-
-
-2. **On the “accounting” folder you created earlier, set the following permissions:**
-3. **Folder: “accounting”, Group: “ACCOUNTANTS”, Permissions: “Read/Write”**
-
-![vivaldi_SeDK46vClF](https://user-images.githubusercontent.com/109401839/213241173-107c6264-0c34-463e-ae23-b4bd816b7dad.png)
-
-4. **On Client-1, as <someuser>, try to access the accountants folder. It should fail.**
-5. **Log out of Client-1 as <someuser>**
-6. **On DC-1, make <someuser> a member of the “ACCOUNTANTS” Security Group**
-7. **Sign back into Client-1 as <someuser> and try to access the “accounting” share in \\DC-1\**
-
-In the [next tutorial](https://github.com/bishar08/Learning_about_DNS),  we will go over settingup DNS. You may keep the virtual machine from this lab and continue with the next tutorial. 
+- Back in Wireshark, filter for DNS traffic only
+- From your Windows 10 VM within a command line, use nslookup to see what google.com and disney.com’s IP addresses are
+   - Observe the DNS traffic being show in WireShark
